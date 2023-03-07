@@ -1,4 +1,3 @@
-
 # Interactions - Lab
 
 ## Introduction
@@ -62,9 +61,9 @@ from itertools import combinations
 # code to find top interactions by R^2 value here
 ```
 
-It looks like the top interactions involve the Neighborhood_Edwards feature so lets add the interaction between LotArea and Edwards to our model.
+It looks like the top interactions involve the GrLivArea feature so lets add the interaction between GrLivArea and Neighborhood_Mitchel to our model.
 
-We can interpret this feature as the relationship between LotArea and SalePrice when the house is in Edwards or not.
+We can interpret this feature as the relationship between GrLivArea and SalePrice when the house is in Mitchel or not.
 
 ## Visualize the Interaction
 
@@ -84,7 +83,7 @@ Use 10-fold cross-validation to build a model using the above interaction.
 # code here
 ```
 
-Our $R^2$ has increased considerably! Let's have a look in `statsmodels` to see if this interactions are significant.
+Our $R^2$ has not increased considerably. Let's have a look in `statsmodels` to see if these interactions are significant.
 
 
 ```python
