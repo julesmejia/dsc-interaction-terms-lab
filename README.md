@@ -35,10 +35,17 @@ Create a baseline model which includes all the variables we selected from the Am
 
 
 ```python
-ames = pd.read_csv('ames.csv')
+ames = pd.read_csv("ames.csv")
 
-continuous = ['LotArea', '1stFlrSF', 'GrLivArea', 'SalePrice']
-categoricals = ['BldgType', 'KitchenQual', 'SaleType', 'MSZoning', 'Street', 'Neighborhood']
+continuous = ["LotArea", "1stFlrSF", "GrLivArea", "SalePrice"]
+categoricals = [
+    "BldgType",
+    "KitchenQual",
+    "SaleType",
+    "MSZoning",
+    "Street",
+    "Neighborhood",
+]
 
 ## code here
 ```
