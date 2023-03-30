@@ -35,23 +35,32 @@ Create a baseline model which includes all the variables we selected from the Am
 
 
 ```python
-ames = pd.read_csv('ames.csv')
+ames = pd.read_csv("ames.csv")
 
-continuous = ['LotArea', '1stFlrSF', 'GrLivArea', 'SalePrice']
-categoricals = ['BldgType', 'KitchenQual', 'SaleType', 'MSZoning', 'Street', 'Neighborhood']
+continuous = ["LotArea", "1stFlrSF", "GrLivArea", "SalePrice"]
+categoricals = [
+    "BldgType",
+    "KitchenQual",
+    "SaleType",
+    "MSZoning",
+    "Street",
+    "Neighborhood",
+]
 
 ames_cont = ames[continuous]
 
 # log features
-log_names = [f'{column}_log' for column in ames_cont.columns]
+log_names = [f"{column}_log" for column in ames_cont.columns]
 
 ames_log = np.log(ames_cont)
 ames_log.columns = log_names
 
 # normalize (subract mean and divide by std)
 
+
 def normalize(feature):
     return (feature - feature.mean()) / feature.std()
+
 
 ames_log_norm = ames_log.apply(normalize)
 
@@ -60,11 +69,11 @@ ames_ohe = pd.get_dummies(ames[categoricals], prefix=categoricals)
 
 preprocessed = pd.concat([ames_log_norm, ames_ohe], axis=1)
 
-X = preprocessed.drop('SalePrice_log', axis=1)
-y = preprocessed['SalePrice_log']
+X = preprocessed.drop("SalePrice_log", axis=1)
+y = preprocessed["SalePrice_log"]
 
 crossvalidation = KFold(n_splits=10, shuffle=True, random_state=1)
-baseline = np.mean(cross_val_score(regression, X, y, scoring='r2', cv=crossvalidation))
+baseline = np.mean(cross_val_score(regression, X, y, scoring="r2", cv=crossvalidation))
 
 baseline
 ```
@@ -94,15 +103,20 @@ feat_combinations = combinations(X.columns, 2)
 
 data = X.copy()
 for i, (a, b) in enumerate(feat_combinations):
-    data['interaction'] = data[a] * data[b]
-    score = np.mean(cross_val_score(regression, data, y, scoring='r2', cv=crossvalidation))
+    data["interaction"] = data[a] * data[b]
+    score = np.mean(
+        cross_val_score(regression, data, y, scoring="r2", cv=crossvalidation)
+    )
     if score > baseline:
-        interactions.append((a, b, round(score,3)))
-    
+        interactions.append((a, b, round(score, 3)))
+
     if i % 50 == 0:
         print(i)
-            
-print('Top 3 interactions: %s' %sorted(interactions, key=lambda inter: inter[2], reverse=True)[:3])
+
+print(
+    "Top 3 interactions: %s"
+    % sorted(interactions, key=lambda inter: inter[2], reverse=True)[:3]
+)
 ```
 
     0
@@ -149,31 +163,41 @@ Separate all houses that are located in Edwards and those that are not. Run a li
 
 fig, ax = plt.subplots(figsize=(13, 10))
 
-col = 'GrLivArea_log'
+col = "GrLivArea_log"
 
-is_in = preprocessed.loc[preprocessed['Neighborhood_Mitchel'] == 1, [col, 'SalePrice_log']]
+is_in = preprocessed.loc[
+    preprocessed["Neighborhood_Mitchel"] == 1, [col, "SalePrice_log"]
+]
 
 linreg = LinearRegression()
-linreg.fit(is_in[[col]], is_in['SalePrice_log'])
+linreg.fit(is_in[[col]], is_in["SalePrice_log"])
 
 preds = linreg.predict(is_in[[col]])
 
-ax.scatter(is_in[[col]], is_in['SalePrice_log'], alpha=.3, label=None)
+ax.scatter(is_in[[col]], is_in["SalePrice_log"], alpha=0.3, label=None)
 
 x = np.linspace(-5, 5)
-ax.plot(x, linreg.predict(x.reshape(-1, 1)), label=f'In Mitchel:   {linreg.coef_[0]:.2f}')
+ax.plot(
+    x, linreg.predict(x.reshape(-1, 1)), label=f"In Mitchel:   {linreg.coef_[0]:.2f}"
+)
 
-not_in = preprocessed.loc[preprocessed['Neighborhood_Mitchel'] == 0, [col, 'SalePrice_log']]
+not_in = preprocessed.loc[
+    preprocessed["Neighborhood_Mitchel"] == 0, [col, "SalePrice_log"]
+]
 
 linreg = LinearRegression()
-linreg.fit(not_in[[col]], not_in['SalePrice_log'])
+linreg.fit(not_in[[col]], not_in["SalePrice_log"])
 
 preds = linreg.predict(not_in[[col]])
 
-ax.scatter(not_in[[col]], not_in['SalePrice_log'], alpha=.1, label=None)
+ax.scatter(not_in[[col]], not_in["SalePrice_log"], alpha=0.1, label=None)
 
 x = np.linspace(-5, 5)
-ax.plot(x, linreg.predict(x.reshape(-1, 1)), label=f'Outside of Mitchel:   {linreg.coef_[0]:.2f}')
+ax.plot(
+    x,
+    linreg.predict(x.reshape(-1, 1)),
+    label=f"Outside of Mitchel:   {linreg.coef_[0]:.2f}",
+)
 
 ax.legend()
 ```
@@ -201,9 +225,13 @@ regression = LinearRegression()
 crossvalidation = KFold(n_splits=10, shuffle=True, random_state=1)
 final = X.copy()
 
-final['Neighborhood_Mitchel*GrLivArea'] = final['Neighborhood_Mitchel'] * final['GrLivArea_log']
+final["Neighborhood_Mitchel*GrLivArea"] = (
+    final["Neighborhood_Mitchel"] * final["GrLivArea_log"]
+)
 
-final_model = np.mean(cross_val_score(regression, final, y, scoring='r2', cv=crossvalidation))
+final_model = np.mean(
+    cross_val_score(regression, final, y, scoring="r2", cv=crossvalidation)
+)
 
 final_model
 ```
@@ -220,8 +248,9 @@ Our $R^2$ has not increased considerably. Let's have a look in `statsmodels` to 
 
 ```python
 import statsmodels.api as sm
+
 df_inter_sm = sm.add_constant(final)
-model = sm.OLS(y,final)
+model = sm.OLS(y, final)
 results = model.fit()
 
 results.summary()
